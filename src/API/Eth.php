@@ -19,6 +19,7 @@ use EthereumRPC\EthereumRPC;
 use EthereumRPC\Exception\GethException;
 use EthereumRPC\Response\Block;
 use EthereumRPC\Response\Transaction;
+use EthereumRPC\Response\TransactionLog;
 use EthereumRPC\Response\TransactionReceipt;
 
 /**
@@ -191,5 +192,37 @@ class Eth
         }
 
         return $send;
+    }
+
+    /**
+     * @param int $startBlock
+     * @param int $endBlock
+     * @param string $address
+     * @param array $topics
+     * @return array
+     * @throws GethException
+     * @throws \EthereumRPC\Exception\ConnectionException
+     * @throws \EthereumRPC\Exception\ResponseObjectException
+     * @throws \HttpClient\Exception\HttpClientException
+     */
+    public function getPastLogs(int $startBlock = 0,?int $endBlock = null, ?string $address = null,?array $topics = null): ?Transaction
+    {
+        if($endBlock ==null) $endBlock = $startBlock + 10;
+        $data = [
+            "fromBlock" => "0x" . dechex($startBlock),
+            "toBlock" => "0x" . dechex($endBlock),
+        ];
+        if($address != null) $data['address'] =$address;
+        if($topics != null) $data['topics'] =$topics;
+        $request = $this->client->jsonRPC("eth_getLogs", null, [$data]);
+        $transactions = $request->get("result");
+        if (!is_array($transactions)) {
+            throw GethException::unexpectedResultType("eth_getLogs", "array", gettype($transactions));
+        }
+        $trans = [];
+        foreach($transactions as $transaction){
+            $trans[] = new TransactionLog($transaction);
+        }
+        return $trans;
     }
 }
