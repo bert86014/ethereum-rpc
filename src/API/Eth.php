@@ -205,7 +205,7 @@ class Eth
      * @throws \EthereumRPC\Exception\ResponseObjectException
      * @throws \HttpClient\Exception\HttpClientException
      */
-    public function getPastLogs(int $startBlock = 0,?int $endBlock = null, ?string $address = null,?array $topics = null): ?Transaction
+    public function getPastLogs(int $startBlock = 0,?int $endBlock = null, ?string $address = null,?array $topics = null): ?array
     {
         if($endBlock ==null) $endBlock = $startBlock + 10;
         $data = [
